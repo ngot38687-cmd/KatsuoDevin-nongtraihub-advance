@@ -24,7 +24,7 @@
   // ============================================================
   // Danh sách các Key hợp lệ (Thêm key mới vào đây mỗi khi muốn đổi đợt)
   const VALID_KEYS = [
-      "KATSUO_ADVANCE_c5c20268-a64b-4ad8-8c12-0de37268ec5a" // Key hiện tại của bạn
+      "KATSUO_ADVANCE_ab6a300e-3db0-429f-a3fb-acb639306ded" // Key hiện tại của bạn
   ];
 
   const MASTER_KEY = "KATSUO_MASTER_BYPASS"; // Key mở khóa vĩnh viễn cho bạn test
