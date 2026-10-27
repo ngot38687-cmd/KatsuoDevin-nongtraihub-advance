@@ -23,7 +23,7 @@
   // HỆ THỐNG XÁC THỰC KEY (KEY GATE)
   // ============================================================
   const VALID_KEYS = {
-      "27/10/2026": "KATSUO_VIP_2710",
+      "27/10/2026": "KATSUO_ADVANCE_c5c20268-a64b-4ad8-8c12-0de37268ec5a",
 
       // Thêm key mới ở đây, đừng quên Commit lên GitHub
   };
