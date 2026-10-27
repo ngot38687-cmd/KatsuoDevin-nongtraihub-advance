@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Nông trại 10 — KatsuoDevin Hub (v1.6)
+// @name         Nông trại 10 — KatsuoDevin Hub (v1.8)
 // @namespace    local
-// @version      Advance-1.0
-// @description  Giao diện Liquid Glass, Mod by Katsuo. Tích hợp khóa bảo mật Key và Tự động cập nhật qua GitHub.
+// @version      Advance-1.8
+// @description  Giao diện Liquid Glass, Mod by Katsuo. Fix hệ thống Key 14 ngày.
 // @match        https://nongtrai10.netlify.app/*
 // @run-at       document-idle
 // @grant        none
@@ -20,25 +20,33 @@
   const norm = s => String(s || '').trim();
 
   // ============================================================
-  // HỆ THỐNG XÁC THỰC KEY (KEY GATE)
+  // HỆ THỐNG XÁC THỰC KEY (KEY 14 NGÀY)
   // ============================================================
-  const VALID_KEYS = {
-      "27/10/2026": "KATSUO_ADVANCE_c5c20268-a64b-4ad8-8c12-0de37268ec5a",
+  // Danh sách các Key hợp lệ (Thêm key mới vào đây mỗi khi muốn đổi đợt)
+  const VALID_KEYS = [
+      "KATSUO_ADVANCE_c5c20268-a64b-4ad8-8c12-0de37268ec5a" // Key hiện tại của bạn
+  ];
 
-      // Thêm key mới ở đây, đừng quên Commit lên GitHub
-  };
+  const MASTER_KEY = "KATSUO_MASTER_BYPASS"; // Key mở khóa vĩnh viễn cho bạn test
+  const DAYS_VALID = 14; // Số ngày hiệu lực của key
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-    const MASTER_KEY = "KATSUO_MASTER_BYPASS"; // Key mở khóa vĩnh viễn cho bạn test
-    const DAYS_VALID = 14; // Số ngày hiệu lực của key
-    const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-
-    const checkAuth = () => {
+  const checkAuth = () => {
       const savedKey = localStorage.getItem('katsuo_hub_key');
-      if (!savedKey) return false;
+      const expireTime = localStorage.getItem('katsuo_hub_expire');
       
-      const todayStr = new Date().toLocaleDateString('vi-VN');
-      return savedKey === VALID_KEYS[todayStr] || savedKey === "KATSUO_MASTER_BYPASS";
+      if (!savedKey || !expireTime) return false;
+      
+      // Nếu là Master Key thì luôn cho qua
+      if (savedKey === MASTER_KEY) return true;
+      
+      // Kiểm tra key có nằm trong danh sách hợp lệ không
+      if (!VALID_KEYS.includes(savedKey)) return false;
+      
+      // Kiểm tra thời gian hết hạn (nếu thời gian hiện tại lớn hơn hạn thì khóa)
+      if (Date.now() > parseInt(expireTime)) return false;
+      
+      return true;
   };
 
   const showAuthModal = () => {
@@ -89,7 +97,7 @@
         
         <div class="auth-body">
           <div class="auth-err" id="auth-err">Key không hợp lệ hoặc đã hết hạn!</div>
-          <input type="text" id="auth-input" placeholder="Nhập Key hôm nay...">
+          <input type="text" id="auth-input" placeholder="Nhập Key 14 ngày...">
           <button id="auth-btn">XÁC NHẬN</button>
         </div>
       `;
@@ -129,11 +137,14 @@
 
       const attemptLogin = () => {
           const val = input.value.trim();
-          const todayStr = new Date().toLocaleDateString('vi-VN');
-          const expectedKey = VALID_KEYS[todayStr];
 
-          if (val === expectedKey || val === "KATSUO_MASTER_BYPASS") {
+          if (val === MASTER_KEY || VALID_KEYS.includes(val)) {
               localStorage.setItem('katsuo_hub_key', val);
+              
+              // Tính toán thời gian hết hạn (Hiện tại + 14 ngày)
+              const expireTime = Date.now() + (DAYS_VALID * MS_PER_DAY);
+              localStorage.setItem('katsuo_hub_expire', expireTime.toString());
+              
               modal.remove();
               initHub();
           } else {
