@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Nông trại 10 — KatsuoDevin Hub (v1.8)
+// @name         Nông trại 10 — KatsuoDevin Hub (v1.11)
 // @namespace    local
-// @version      Advance-1.9
-// @description  Giao diện Liquid Glass, Mod by Katsuo. Fix hệ thống Key 14 ngày.
+// @version      Advance-1.11
+// @description  Giao diện Liquid Glass, Mod by Katsuo. Tích hợp Auto Thu hoạch, Tưới, Trồng lại, Chăn nuôi.
 // @match        https://nongtrai10.netlify.app/*
 // @run-at       document-idle
 // @grant        none
@@ -22,9 +22,8 @@
   // ============================================================
   // HỆ THỐNG XÁC THỰC KEY (KEY 14 NGÀY)
   // ============================================================
-  // Danh sách các Key hợp lệ (Thêm key mới vào đây mỗi khi muốn đổi đợt)
   const VALID_KEYS = [
-      "KATSUO_ADVANCE_ed34f5b1-91e7-41c7-b1ec-1c9b6b693f29" // Key hiện tại của bạn
+      "KATSUO_ADVANCE_ab6a300e-3db0-429f-a3fb-acb639306ded" // Key hiện tại của bạn
   ];
 
   const MASTER_KEY = "KATSUO_MASTER_BYPASS"; // Key mở khóa vĩnh viễn cho bạn test
@@ -37,13 +36,10 @@
       
       if (!savedKey || !expireTime) return false;
       
-      // Nếu là Master Key thì luôn cho qua
       if (savedKey === MASTER_KEY) return true;
       
-      // Kiểm tra key có nằm trong danh sách hợp lệ không
       if (!VALID_KEYS.includes(savedKey)) return false;
       
-      // Kiểm tra thời gian hết hạn (nếu thời gian hiện tại lớn hơn hạn thì khóa)
       if (Date.now() > parseInt(expireTime)) return false;
       
       return true;
@@ -103,7 +99,6 @@
       `;
       document.body.appendChild(modal);
 
-      // Logic Kéo Thả Panel
       const header = document.getElementById('katsuo-auth-header');
       let isDragging = false, startX, startY, startLeft, startTop;
 
@@ -130,7 +125,6 @@
         header.releasePointerCapture(e.pointerId);
       };
 
-      // Logic Nhập Key
       const input = document.getElementById('auth-input');
       const btn = document.getElementById('auth-btn');
       const err = document.getElementById('auth-err');
@@ -141,7 +135,6 @@
           if (val === MASTER_KEY || VALID_KEYS.includes(val)) {
               localStorage.setItem('katsuo_hub_key', val);
               
-              // Tính toán thời gian hết hạn (Hiện tại + 14 ngày)
               const expireTime = Date.now() + (DAYS_VALID * MS_PER_DAY);
               localStorage.setItem('katsuo_hub_expire', expireTime.toString());
               
@@ -505,9 +498,26 @@
         }
     }
 
-    // AUTO FARM
+    // AUTO FARM (Đã tích hợp Thu hoạch, Tưới, Trồng lại, Chăn nuôi)
     if (cfg.autoFarm) {
+      // 1. Thu hoạch toàn bộ cây chín và nhặt sản phẩm
+      if (window._G.thuHet) window._G.thuHet();
+      
+      // 2. Tưới nước cho cây đang khát
       if (window._G.tuoiHet) window._G.tuoiHet();
+      
+      // 3. Tự động trồng lại cây khi đất trống
+      const CAY = window._G.getCAY();
+      const crop = CAY[cfg.plantId];
+      if (S && crop) {
+        S.o.forEach((plot, i) => {
+            if (i < S.soO && !plot && S.xu >= crop.gia) {
+                if (window._G.gieo) window._G.gieo(i, cfg.plantId);
+            }
+        });
+      }
+
+      // 4. Chăn nuôi (Mua mới nếu thiếu, cho ăn, thu hoạch sản phẩm)
       if (S.vat.length < 8) {
         const animal = window._G.getVAT()[cfg.animalId];
         if (animal && S.xu >= animal.gia && window._G.muaVat) window._G.muaVat(cfg.animalId);
@@ -603,7 +613,7 @@
                 <button id="btn-stop" style="width: 100%; padding: 8px; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4); background: linear-gradient(135deg, rgba(224, 49, 49, 0.8), rgba(201, 42, 42, 0.8)); color: #fff; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 12px;">🛑 Dừng Auto</button>
                 
                 <div style="display: grid; gap: 10px; margin-bottom: 12px;">
-                  <label class="db-switch"><input type="checkbox" id="cb-farm" ${cfg.autoFarm?'checked':''}> Auto Chăn nuôi</label>
+                  <label class="db-switch"><input type="checkbox" id="cb-farm" ${cfg.autoFarm?'checked':''}> Auto Nông trại (Thu hoạch, Trồng, Chăn nuôi)</label>
                   <label class="db-switch"><input type="checkbox" id="cb-sell" ${cfg.autoSell?'checked':''}> Auto Bán đồ</label>
                   <label class="db-switch"><input type="checkbox" id="cb-land" ${cfg.autoLand?'checked':''}> Auto Mở đất</label>
                 </div>
