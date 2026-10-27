@@ -23,7 +23,7 @@
   // HỆ THỐNG XÁC THỰC KEY (KEY 14 NGÀY)
   // ============================================================
   const VALID_KEYS = [
-      "KATSUO_ADVANCE_fa6a8f87-02ff-470d-91a9-fcafcd5f67776" // Key hiện tại của bạn
+      "KATSUO_ADVANCE_fa6a8f87-02ff-470d-91a9-fcafcd5f67771" // Key hiện tại của bạn
   ];
 
   const MASTER_KEY = "KATSUO_MASTER_BYPASS"; // Key mở khóa vĩnh viễn cho bạn test
