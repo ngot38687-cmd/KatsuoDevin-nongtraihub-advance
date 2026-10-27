@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Nông trại 10 — KatsuoDevin Hub (v1.11)
 // @namespace    local
-// @version      Advance-1.11
+// @version      Advance-1.12
 // @description  Giao diện Liquid Glass, Mod by Katsuo. Tích hợp Auto Thu hoạch, Tưới, Trồng lại, Chăn nuôi.
 // @match        https://nongtrai10.netlify.app/*
 // @run-at       document-idle
